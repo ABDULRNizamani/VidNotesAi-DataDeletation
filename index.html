@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account &amp; Data Deletion — Vid Notes Ai</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:       #0d0f14;
+      --surface:  #13161e;
+      --surface2: #1a1e29;
+      --border:   rgba(255,255,255,0.07);
+      --accent:   #e8ff5a;
+      --accent2:  #5affe8;
+      --text:     #e8eaf0;
+      --muted:    #8891a8;
+      --danger:   #ff6b6b;
+      --safe:     #5affb0;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+      background-size: 64px 64px;
+      pointer-events: none; z-index: 0;
+    }
+
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(130px);
+      pointer-events: none; z-index: 0;
+    }
+    .blob-1 { width:700px; height:700px; background: radial-gradient(circle, rgba(232,255,90,0.055), transparent 70%); top:-200px; right:-200px; }
+    .blob-2 { width:500px; height:500px; background: radial-gradient(circle, rgba(90,255,232,0.04), transparent 70%); bottom:-100px; left:-100px; }
+
+    .page-wrap {
+      position: relative; z-index: 1;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 24px 100px;
+    }
+
+    /* SVG icon util */
+    .icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .icon svg { display: block; }
+
+    /* ─── HEADER ─── */
+    header {
+      padding: 60px 0 50px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 60px;
+    }
+
+    .app-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 6px 18px 6px 8px;
+      margin-bottom: 30px;
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .app-icon {
+      width: 30px; height: 30px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2.1rem, 5vw, 3.1rem);
+      line-height: 1.13;
+      letter-spacing: -0.02em;
+      margin-bottom: 18px;
+      animation: fadeUp 0.5s 0.1s ease both;
+    }
+    h1 em { font-style: italic; color: var(--accent); }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 15px;
+      max-width: 540px;
+      line-height: 1.7;
+      animation: fadeUp 0.5s 0.2s ease both;
+    }
+
+    /* ─── SECTIONS ─── */
+    section { margin-bottom: 60px; }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 22px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.65rem;
+      letter-spacing: -0.015em;
+      margin-bottom: 14px;
+    }
+
+    p { color: var(--muted); margin-bottom: 12px; font-size: 15px; }
+    p:last-child { margin-bottom: 0; }
+
+    /* ─── STEPS ─── */
+    .steps { display: flex; flex-direction: column; gap: 4px; margin-top: 26px; }
+
+    .step {
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+      background: rgba(21,25,35,0.6);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 22px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .step:hover {
+      border-color: rgba(232,255,90,0.22);
+      background: rgba(232,255,90,0.03);
+    }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 34px; height: 34px;
+      background: var(--surface2);
+      border: 1px solid rgba(232,255,90,0.25);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .step-body { flex: 1; }
+    .step-title { font-weight: 600; font-size: 15px; color: var(--text); margin-bottom: 5px; }
+    .step-desc  { font-size: 14px; color: var(--muted); line-height: 1.6; margin: 0; }
+
+    .step-email {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      background: rgba(232,255,90,0.08);
+      border: 1px solid rgba(232,255,90,0.2);
+      color: var(--accent);
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      letter-spacing: 0.01em;
+      transition: background 0.2s;
+    }
+    .step-email:hover { background: rgba(232,255,90,0.14); }
+
+    /* ─── IN-APP CALLOUT ─── */
+    .inapp-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px 28px 24px;
+      margin-top: 24px;
+    }
+
+    .inapp-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .phone-icon {
+      width: 42px; height: 42px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .inapp-header-text strong {
+      display: block;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .inapp-header-text span { font-size: 13px; color: var(--muted); }
+
+    .path-steps { display: flex; flex-direction: column; gap: 0; }
+
+    .path-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .path-step:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .path-arrow {
+      width: 28px; height: 28px;
+      background: var(--surface2);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .path-text { font-size: 14px; color: var(--muted); line-height: 1.55; padding-top: 3px; }
+    .path-text strong { color: var(--text); font-weight: 500; }
+
+    /* ─── DATA GRID ─── */
+    .data-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    @media (max-width: 520px) { .data-grid { grid-template-columns: 1fr; } }
+
+    .data-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+    }
+    .data-card.deleted { border-color: rgba(255,107,107,0.18); }
+    .data-card.kept    { border-color: rgba(90,255,176,0.18); }
+
+    .data-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+    }
+    .badge-deleted { background: rgba(255,107,107,0.1); color: var(--danger); border: 1px solid rgba(255,107,107,0.2); }
+    .badge-kept    { background: rgba(90,255,176,0.1);  color: var(--safe);   border: 1px solid rgba(90,255,176,0.2); }
+
+    .data-items { display: flex; flex-direction: column; gap: 9px; }
+
+    .data-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .data-item-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 7px;
+    }
+    .deleted .data-item-dot { background: var(--danger); }
+    .kept    .data-item-dot { background: var(--safe); }
+
+    /* ─── ALERT BOX ─── */
+    .alert-box {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      background: rgba(255,107,107,0.06);
+      border: 1px solid rgba(255,107,107,0.2);
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-top: 20px;
+    }
+    .alert-icon {
+      width: 34px; height: 34px;
+      background: rgba(255,107,107,0.12);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .alert-text { font-size: 14px; color: var(--muted); line-height: 1.6; }
+    .alert-text strong { color: var(--danger); font-weight: 600; }
+
+    /* ─── TIMELINE ─── */
+    .timeline { margin-top: 24px; display: flex; flex-direction: column; gap: 0; }
+
+    .tl-item {
+      display: flex;
+      gap: 20px;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .tl-item:last-child { border-bottom: none; }
+
+    .tl-dot-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+      width: 16px;
+      padding-top: 7px;
+    }
+    .tl-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+    .tl-dot.grey { background: var(--muted); }
+
+    .tl-content { flex: 1; }
+    .tl-time { font-size: 12px; font-weight: 600; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 5px; }
+    .tl-time.grey { color: var(--muted); }
+    .tl-text { font-size: 14px; color: var(--muted); line-height: 1.6; }
+    .tl-text strong { color: var(--text); font-weight: 500; }
+
+    /* ─── CONTACT ─── */
+    .contact-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+
+    .contact-icon {
+      width: 52px; height: 52px;
+      background: linear-gradient(135deg, rgba(232,255,90,0.12), rgba(90,255,232,0.08));
+      border: 1px solid rgba(232,255,90,0.2);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .contact-details { flex: 1; min-width: 200px; }
+    .contact-details strong { display: block; font-size: 15px; color: var(--text); font-weight: 600; margin-bottom: 4px; }
+    .contact-details span { font-size: 13px; color: var(--muted); }
+
+    .contact-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: #0d0f14;
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: opacity 0.2s, transform 0.15s;
+      white-space: nowrap;
+    }
+    .contact-link:hover { opacity: 0.88; transform: translateY(-1px); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding-top: 32px;
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer-brand {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 14px; font-weight: 600; color: var(--text);
+    }
+
+    .footer-brand .mini-icon {
+      width: 26px; height: 26px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .footer-right { font-size: 13px; color: var(--muted); }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in {
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 600px) {
+      header { padding: 40px 0 36px; }
+      .contact-card { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <div class="page-wrap">
+
+    <!-- ─── HEADER ─── -->
+    <header>
+      <div class="app-badge">
+        <div class="app-icon">
+          <!-- play / video icon -->
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0d0f14" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+        </div>
+        Vid Notes Ai &nbsp;·&nbsp; Developer: abdulrehman
+      </div>
+      <h1>Account &amp; Data<br><em>Deletion Request</em></h1>
+      <p class="subtitle">
+        This page explains how you can request the deletion of your
+        <strong style="color:var(--text)">Vid Notes Ai</strong> account and all associated data,
+        and exactly what happens when you do.
+      </p>
+    </header>
+
+    <!-- ─── 01. HOW TO DELETE ─── -->
+    <section class="fade-in">
+      <div class="section-label">01 &nbsp;How to delete</div>
+      <h2>Steps to request account deletion</h2>
+      <p>
+        You can delete your account directly inside the app in seconds,
+        or email us if you prefer. Both methods trigger the same permanent deletion.
+      </p>
+
+      <!-- In-app path -->
+      <div class="inapp-card">
+        <div class="inapp-header">
+          <div class="phone-icon">
+            <!-- smartphone icon -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0d0f14" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+              <line x1="12" y1="18" x2="12.01" y2="18"/>
+            </svg>
+          </div>
+          <div class="inapp-header-text">
+            <strong>Delete from the app (recommended)</strong>
+            <span>Instant — no waiting required</span>
+          </div>
+        </div>
+        <div class="path-steps">
+          <div class="path-step">
+            <div class="path-arrow">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><text x="8" y="16" font-size="11" fill="var(--accent2)" stroke="none" font-family="sans-serif">1</text>
+              </svg>
+            </div>
+            <div class="path-text">Open <strong>Vid Notes Ai</strong> on your Android device and sign in to your account.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-arrow">
+              <!-- user / profile icon -->
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <div class="path-text">Tap the <strong>Profile</strong> tab at the bottom of the screen.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-arrow">
+              <!-- trash icon -->
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-1 14H6L5 6"/>
+                <path d="M10 11v6M14 11v6"/>
+                <path d="M9 6V4h6v2"/>
+              </svg>
+            </div>
+            <div class="path-text">Scroll to the bottom and tap <strong>"Delete account"</strong> (shown in red).</div>
+          </div>
+          <div class="path-step">
+            <div class="path-arrow">
+              <!-- alert-triangle icon -->
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+            </div>
+            <div class="path-text">Confirm the deletion in the pop-up dialog by tapping <strong>"Delete permanently"</strong>.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-arrow">
+              <!-- check icon -->
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--safe)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+            <div class="path-text">Your account and all associated data are deleted immediately. You are signed out automatically.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Email path -->
+      <div class="steps" style="margin-top:16px;">
+        <div class="step">
+          <div class="step-num">
+            <!-- mail icon -->
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </div>
+          <div class="step-body">
+            <div class="step-title">Request via email</div>
+            <p class="step-desc">
+              If you cannot access the app, send an email from the address linked to your Vid Notes Ai account.
+              Include your registered email address and the subject line <em>"Account Deletion Request – Vid Notes Ai"</em>.
+              We will process your request within <strong style="color:var(--text)">7 business days</strong>.
+            </p>
+            <a class="step-email" href="mailto:nizamaniabdulrehman49@gmail.com?subject=Account%20Deletion%20Request%20%E2%80%93%20Vid%20Notes%20Ai">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+              nizamaniabdulrehman49@gmail.com
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── 02. WHAT GETS DELETED ─── -->
+    <section class="fade-in">
+      <div class="section-label">02 &nbsp;What gets deleted</div>
+      <h2>Data deleted &amp; data retained</h2>
+      <p>
+        When your account is deleted we permanently remove all personal and
+        user-generated data from our systems. The table below details exactly
+        what is erased and what (if anything) is retained.
+      </p>
+
+      <div class="data-grid">
+        <!-- Deleted -->
+        <div class="data-card deleted">
+          <div class="data-card-header">
+            <span class="badge badge-deleted">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-1 14H6L5 6"/>
+                <path d="M10 11v6M14 11v6"/>
+                <path d="M9 6V4h6v2"/>
+              </svg>
+              Permanently deleted
+            </span>
+          </div>
+          <div class="data-items">
+            <div class="data-item"><div class="data-item-dot"></div><span><strong style="color:var(--text)">Account &amp; profile</strong> — name, email, avatar, streak data</span></div>
+            <div class="data-item"><div class="data-item-dot"></div><span><strong style="color:var(--text)">Subjects &amp; topics</strong> — all course / subject / topic entries</span></div>
+            <div class="data-item"><div class="data-item-dot"></div><span><strong style="color:var(--text)">Video sources</strong> — YouTube URLs, video IDs, and transcripts</span></div>
+            <div class="data-item"><div class="data-item-dot"></div><span><strong style="color:var(--text)">AI-generated notes</strong> — all notes and their content</span></div>
+            <div class="data-item"><div class="data-item-dot"></div><span><strong style="color:var(--text)">Flashcards</strong> — all flashcard sets</span></div>
+            <div class="data-item"><div class="data-item-dot"></div><span><strong style="color:var(--text)">Quizzes &amp; attempts</strong> — questions, answers, and scores</span></div>
+            <div class="data-item"><div class="data-item-dot"></div><span><strong style="color:var(--text)">Daily quizzes</strong> — daily quiz history and streak records</span></div>
+            <div class="data-item"><div class="data-item-dot"></div><span><strong style="color:var(--text)">Chat sessions &amp; messages</strong> — all AI chat conversations</span></div>
+            <div class="data-item"><div class="data-item-dot"></div><span><strong style="color:var(--text)">PDF exports</strong> — export history</span></div>
+            <div class="data-item"><div class="data-item-dot"></div><span><strong style="color:var(--text)">Share links</strong> — all shareable note links and tokens</span></div>
+            <div class="data-item"><div class="data-item-dot"></div><span><strong style="color:var(--text)">Weekly summaries</strong> — AI-generated study summaries</span></div>
+            <div class="data-item"><div class="data-item-dot"></div><span><strong style="color:var(--text)">Device records</strong> — registered device identifiers</span></div>
+            <div class="data-item"><div class="data-item-dot"></div><span><strong style="color:var(--text)">PDF extraction history</strong></span></div>
+            <div class="data-item"><div class="data-item-dot"></div><span><strong style="color:var(--text)">Authentication credentials</strong> — Google OAuth tokens and sessions</span></div>
+          </div>
+        </div>
+
+        <!-- Kept -->
+        <div class="data-card kept">
+          <div class="data-card-header">
+            <span class="badge badge-kept">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              May be retained
+            </span>
+          </div>
+          <div class="data-items">
+            <div class="data-item"><div class="data-item-dot"></div><span><strong style="color:var(--text)">Anonymised server logs</strong> — error and performance logs with no personal identifiers. Retained up to <strong style="color:var(--text)">90 days</strong> for security auditing, then purged.</span></div>
+            <div class="data-item"><div class="data-item-dot"></div><span><strong style="color:var(--text)">Aggregated analytics</strong> — fully anonymous app-usage statistics (no name, email, or user ID attached).</span></div>
+            <div class="data-item"><div class="data-item-dot"></div><span><strong style="color:var(--text)">Legal / financial records</strong> — any transactional or billing records we are legally required to retain under applicable law.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert-box">
+        <div class="alert-icon">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+        <div class="alert-text">
+          <strong>Deletion is permanent and irreversible.</strong>
+          Once confirmed, your account and all personal data listed above cannot be recovered.
+          Export any notes or content you wish to keep before requesting deletion.
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── 03. RETENTION TIMELINE ─── -->
+    <section class="fade-in">
+      <div class="section-label">03 &nbsp;Retention timeline</div>
+      <h2>When is data removed?</h2>
+      <p>
+        Here is a clear timeline of when each category of data is permanently purged
+        after you trigger account deletion.
+      </p>
+
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot-wrap"><div class="tl-dot"></div></div>
+          <div class="tl-content">
+            <div class="tl-time">Immediately — on confirmation</div>
+            <div class="tl-text">
+              <strong>All user-generated content</strong> is deleted: profile, subjects, topics, notes, flashcards,
+              quizzes, chat sessions, share links, PDF exports, device records, and your
+              authentication account. This is triggered via Supabase cascading foreign-key deletes —
+              there is no grace period.
+            </div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot-wrap"><div class="tl-dot"></div></div>
+          <div class="tl-content">
+            <div class="tl-time">Within 30 days</div>
+            <div class="tl-text">
+              Any residual database backups that may contain snapshots of your data are rotated out
+              and permanently overwritten within <strong>30 days</strong>.
+            </div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot-wrap"><div class="tl-dot"></div></div>
+          <div class="tl-content">
+            <div class="tl-time">Within 90 days</div>
+            <div class="tl-text">
+              Server-level logs (which contain no personal data, only anonymised request metadata)
+              are automatically purged within <strong>90 days</strong>.
+            </div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot-wrap"><div class="tl-dot grey"></div></div>
+          <div class="tl-content">
+            <div class="tl-time grey">Indefinitely — anonymised only</div>
+            <div class="tl-text">
+              Fully anonymised, aggregated statistics that carry
+              <strong>no personally identifiable information</strong> may be retained
+              indefinitely for product improvement.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── 04. CONTACT ─── -->
+    <section class="fade-in">
+      <div class="section-label">04 &nbsp;Contact</div>
+      <h2>Need help?</h2>
+      <p>
+        If you have questions about this process, or face any issues deleting your account
+        from within the app, reach out directly.
+      </p>
+
+      <div class="contact-card">
+        <div class="contact-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <div class="contact-details">
+          <strong>Developer: abdulrehman</strong>
+          <span>Vid Notes Ai &nbsp;·&nbsp; Google Play Store</span>
+        </div>
+        <a class="contact-link" href="mailto:nizamaniabdulrehman49@gmail.com?subject=Account%20Deletion%20Request%20%E2%80%93%20Vid%20Notes%20Ai">
+          Send email
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </a>
+      </div>
+    </section>
+
+    <!-- ─── FOOTER ─── -->
+    <footer>
+      <div class="footer-brand">
+        <div class="mini-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0d0f14" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+        </div>
+        Vid Notes Ai
+      </div>
+      <div class="footer-right">Last updated: May 2026 &nbsp;·&nbsp; com.abdulrehman.vidnotesai</div>
+    </footer>
+
+  </div>
+
+  <script>
+    const observer = new IntersectionObserver(
+      entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+      { threshold: 0.08 }
+    );
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
